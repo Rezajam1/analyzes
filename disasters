@@ -1,21 +1,40 @@
-import pandas as pd 
-data = pd.read_excel('C:\Users\Shaghayegh\Downloads\_Emergency+Events+Database+-+Country+Profiles_emdat-country-profiles_2023_04_06')
-# Drop any rows with missing values
-data.dropna(inplace=True)
-# Convert columns to appropriate data types
-data['column_name'] = data['column_name'].astype('data_type')
-# Example: Summary statistics
-summary = data.describe()
-# Example: Value counts
-value_counts = data['column_name'].value_counts()
+from google.colab import files
+uploaded = files.upload()
+import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
-# Ensure your data has latitude and longitude columns
-gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.longitude, data.latitude))
+data = pd.read_excel('_Emergency+Events+Database+-+Country+Profiles_emdat-country-profiles_2023_04_06.xlsx')
+summary = data.describe()
+print(summary)
+event_counts = data.groupby('Disaster Type').size()
+print(event_counts)
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-# Plot
-world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-ax = world.plot(figsize=(15, 10))
-gdf.plot(ax=ax, color='red')
+sns.countplot(data=data, x='Disaster Type')
+plt.xticks(rotation=90)
+plt.show()
+
+yearly_data = data.groupby('Year').sum()
+yearly_data.plot(y='Total Events', kind='line')
+plt.show()
+
+from mpl_toolkits.basemap import Basemap
+
+# Example: Creating mock latitude/longitude data
+data['latitude'] = data['Country'].map({'Germany': 51.1657, 'United States': 37.0902, 'China': 35.8617})
+data['longitude'] = data['Country'].map({'Germany': 10.4515, 'United States': -95.7129, 'China': 104.1954})
+
+# Initialize basemap
+m = Basemap(projection='merc', llcrnrlat=-60, urcrnrlat=90, llcrnrlon=-180, urcrnrlon=180, resolution='c')
+
+# Draw coastlines and countries
+m.drawcoastlines()
+m.drawcountries()
+
+# Plot data points
+x, y = m(data['longitude'].values, data['latitude'].values)
+m.scatter(x, y, marker='o', color='r', zorder=5)
+
 plt.show()
