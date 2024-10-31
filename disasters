@@ -1,0 +1,21 @@
+import pandas as pd 
+data = pd.read_excel('C:\Users\Shaghayegh\Downloads\_Emergency+Events+Database+-+Country+Profiles_emdat-country-profiles_2023_04_06')
+# Drop any rows with missing values
+data.dropna(inplace=True)
+# Convert columns to appropriate data types
+data['column_name'] = data['column_name'].astype('data_type')
+# Example: Summary statistics
+summary = data.describe()
+# Example: Value counts
+value_counts = data['column_name'].value_counts()
+import geopandas as gpd
+import matplotlib.pyplot as plt
+
+# Ensure your data has latitude and longitude columns
+gdf = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.longitude, data.latitude))
+
+# Plot
+world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+ax = world.plot(figsize=(15, 10))
+gdf.plot(ax=ax, color='red')
+plt.show()
